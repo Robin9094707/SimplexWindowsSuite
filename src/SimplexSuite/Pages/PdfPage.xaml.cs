@@ -352,20 +352,27 @@ public sealed partial class PdfPage : Page, IClosableEditor
         image.Width = double.NaN; image.Height = double.NaN;
         if (_thumbs.TryGetValue(item.Id, out var bmp)) { image.Source = bmp; return; }
         image.Source = null;
-        args.RegisterUpdateCallback(async (s, a) =>
+        image.Tag = item.Id;
+        _ = LoadThumbAsync(image, item);
+    }
+
+    private async Task LoadThumbAsync(Image image, PdfPageItem item)
+    {
+        try
         {
-            try
+            if (!_thumbs.TryGetValue(item.Id, out var b))
             {
-                var bytes = await PdfRenderService.RenderAsync(item, 340);
+                var bytes = await PdfRenderService.RenderAsync(item, 320);
                 if (bytes == null) return;
-                var b = new BitmapImage();
+                b = new BitmapImage();
                 using var ms = new MemoryStream(bytes);
                 await b.SetSourceAsync(ms.AsRandomAccessStream());
                 _thumbs[item.Id] = b;
-                if (FindThumbFrame(a.ItemContainer.ContentTemplateRoot) is Border f && a.Item == item) ((Image)f.Child).Source = b;
             }
-            catch { }
-        });
+            // Container könnte inzwischen für eine andere Seite wiederverwendet worden sein
+            if (image.Tag is Guid id && id == item.Id) image.Source = b;
+        }
+        catch { }
     }
 
     private static Border? FindThumbFrame(UIElement root)

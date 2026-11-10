@@ -464,7 +464,8 @@ public sealed partial class VideoPage : Page, IClosableEditor, IDisposable
         {
             var snapshot = _project.DeepClone();
             double t = Math.Min(Timeline.Playhead, Math.Max(0, _project.Duration - 0.01));
-            var file = await Task.Run(() => RenderGraphBuilder.RenderFrameAsync(snapshot, t, PreviewScale, cts.Token), cts.Token);
+            double scale = PreviewScale;
+            var file = await Task.Run(() => RenderGraphBuilder.RenderFrameAsync(snapshot, t, scale, cts.Token), cts.Token);
             if (cts.IsCancellationRequested || file == null) return;
             PreviewPlayer.Visibility = Visibility.Collapsed;
             PreviewImage.Source = await Ui.LoadImageFreshAsync(file);

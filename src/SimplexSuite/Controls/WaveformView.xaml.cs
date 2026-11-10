@@ -188,7 +188,7 @@ public sealed partial class WaveformView : UserControl
         HScroll.LargeChange = w * 0.9;
         HScroll.SmallChange = w * 0.1;
         HScroll.Value = _viewStart;
-        HScroll.Visibility = HScroll.Maximum > 0 ? Visibility.Visible : Visibility.Collapsed;
+        HScroll.Visibility = HScroll.Maximum > w * 0.01 ? Visibility.Visible : Visibility.Collapsed;
         _updatingScroll = false;
     }
 

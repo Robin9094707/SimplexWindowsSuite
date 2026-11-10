@@ -249,7 +249,8 @@ public sealed partial class VideoPage
         await RunBusyAsync("Speichere Standbild", async (p, ct) =>
         {
             var snapshot = _project.DeepClone();
-            var file = await Task.Run(() => RenderGraphBuilder.RenderFrameAsync(snapshot, Timeline.Playhead, 1, ct), ct);
+            double at = Timeline.Playhead;
+            var file = await Task.Run(() => RenderGraphBuilder.RenderFrameAsync(snapshot, at, 1, ct), ct);
             if (file != null) File.Copy(file, path, true);
             Ui.Success("Gespeichert", path);
         });

@@ -36,20 +36,11 @@ jobs:
           "version=$v" >> $env:GITHUB_OUTPUT
           Write-Host "Version: $v"
 
-      - name: Tests (Kernbibliothek)
-        run: dotnet test tests/SimplexSuite.Core.Tests/SimplexSuite.Core.Tests.csproj -c Release --nologo
-
-      - name: App veröffentlichen (self-contained, x64)
-        run: >
-          dotnet publish src/SimplexSuite/SimplexSuite.csproj -c Release -r win-x64 -p:Platform=x64
-          --self-contained true -p:Version=${{ steps.ver.outputs.version }}
-          -p:PublishReadyToRun=false -o publish/SimplexSuite
-
-      - name: FFmpeg und RNNoise-Modell beilegen
+      - name: FFmpeg, RNNoise-Modell und Test-Whisper-Modell laden
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $dest = "publish/SimplexSuite/ffmpeg"
+          $dest = "$env:RUNNER_TEMP/ffmpeg"
           New-Item -ItemType Directory -Force -Path $dest | Out-Null
           $zip = "$env:RUNNER_TEMP/ffmpeg.zip"
           try {
@@ -66,7 +57,29 @@ jobs:
             Invoke-WebRequest -Uri "https://raw.githubusercontent.com/GregorR/rnnoise-models/master/somnolent-hogwash-2018-09-01/sh.rnnn" -OutFile "$dest/sh.rnnn"
           } catch { Write-Warning "RNNoise-Modell konnte nicht geladen werden" }
           & "$dest/ffmpeg.exe" -hide_banner -version | Select-Object -First 1
-          Get-ChildItem $dest
+          $dest | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          "SIMPLEX_RNNOISE_DIR=$dest" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          try {
+            Invoke-WebRequest -Uri "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin" -OutFile "$env:RUNNER_TEMP/ggml-tiny.bin"
+            "SIMPLEX_WHISPER_MODEL=$env:RUNNER_TEMP/ggml-tiny.bin" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          } catch { Write-Warning "Whisper-Testmodell nicht verfügbar" }
+
+      - name: Tests (Kernbibliothek + Integration mit FFmpeg/Whisper)
+        run: dotnet test tests/SimplexSuite.Core.Tests/SimplexSuite.Core.Tests.csproj -c Release --nologo
+
+      - name: App veröffentlichen (self-contained, x64)
+        run: >
+          dotnet publish src/SimplexSuite/SimplexSuite.csproj -c Release -r win-x64 -p:Platform=x64
+          --self-contained true -p:Version=${{ steps.ver.outputs.version }}
+          -p:PublishReadyToRun=false -o publish/SimplexSuite
+
+      - name: FFmpeg beilegen
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path publish/SimplexSuite/ffmpeg | Out-Null
+          Copy-Item "$env:RUNNER_TEMP/ffmpeg/*" publish/SimplexSuite/ffmpeg/
+          Get-ChildItem publish/SimplexSuite/ffmpeg
+          if (-not (Test-Path publish/SimplexSuite/runtimes/win-x64/whisper.dll)) { throw "Whisper-Laufzeit fehlt im Paket" }
 
       - name: Rauchtest (App starten + Screenshots)
         shell: pwsh
