@@ -24,7 +24,7 @@
                 <Canvas x:Name="TrackLayer" />
                 <Canvas x:Name="ClipLayer" />
                 <Rectangle x:Name="SnapLine" Width="1" Visibility="Collapsed" Fill="{ThemeResource SystemFillColorCautionBrush}" IsHitTestVisible="False" />
-                <Grid x:Name="Playhead" IsHitTestVisible="False">
+                <Grid x:Name="PlayheadMarker" IsHitTestVisible="False">
                     <Rectangle Width="2" Fill="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Left" />
                     <Polygon Points="-5,0 7,0 1,8" Fill="{ThemeResource SystemFillColorCriticalBrush}" />
                 </Grid>

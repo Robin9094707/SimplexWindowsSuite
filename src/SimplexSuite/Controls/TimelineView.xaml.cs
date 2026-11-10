@@ -324,9 +324,9 @@ public sealed partial class TimelineView : UserControl
 
     private void UpdatePlayhead()
     {
-        Canvas.SetLeft(Playhead, _playhead * _pps - 1);
-        Canvas.SetTop(Playhead, RulerHeight - 8);
-        if (Playhead.Children[0] is Rectangle r) r.Height = Math.Max(0, Surface.Height - RulerHeight + 8);
+        Canvas.SetLeft(PlayheadMarker, _playhead * _pps - 1);
+        Canvas.SetTop(PlayheadMarker, RulerHeight - 8);
+        if (PlayheadMarker.Children[0] is Rectangle r) r.Height = Math.Max(0, Surface.Height - RulerHeight + 8);
     }
 
     // ------------------------------------------------------------------ Interaktion

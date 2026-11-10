@@ -41,7 +41,7 @@ public sealed partial class SettingsPage : Page
         if (box.Items.Count > 0) box.SelectedIndex = 0;
     }
 
-    private static string? Tag(ComboBox box) => (box.SelectedItem as ComboBoxItem)?.Tag as string;
+    private static string? TagOf(ComboBox box) => (box.SelectedItem as ComboBoxItem)?.Tag as string;
 
     private void BuildModels()
     {
@@ -116,7 +116,7 @@ public sealed partial class SettingsPage : Page
     private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading) return;
-        AppSettings.Current.Theme = Tag(ThemeBox) ?? "System";
+        AppSettings.Current.Theme = TagOf(ThemeBox) ?? "System";
         AppSettings.Current.Save();
         App.MainWindow?.ApplyTheme(AppSettings.Current.Theme);
     }
@@ -124,14 +124,14 @@ public sealed partial class SettingsPage : Page
     private void BackdropBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading) return;
-        AppSettings.Current.Backdrop = Tag(BackdropBox) ?? "Mica";
+        AppSettings.Current.Backdrop = TagOf(BackdropBox) ?? "Mica";
         AppSettings.Current.Save();
         App.MainWindow?.ApplyBackdrop(AppSettings.Current.Backdrop);
     }
 
     private void DefaultModelBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_loading || Tag(DefaultModelBox) is not string f) return;
+        if (_loading || TagOf(DefaultModelBox) is not string f) return;
         AppSettings.Current.WhisperModel = f;
         AppSettings.Current.Save();
     }
@@ -139,7 +139,7 @@ public sealed partial class SettingsPage : Page
     private void LanguageBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading) return;
-        AppSettings.Current.WhisperLanguage = Tag(LanguageBox) ?? "de";
+        AppSettings.Current.WhisperLanguage = TagOf(LanguageBox) ?? "de";
         AppSettings.Current.Save();
     }
 
