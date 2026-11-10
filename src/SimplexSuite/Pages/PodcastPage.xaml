@@ -1,6 +1,345 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Page x:Class="SimplexSuite.Pages.PodcastPage"
+<Page
+    x:Class="SimplexSuite.Pages.PodcastPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="Transparent">
-    <TextBlock Text="Podcast" Style="{StaticResource TitleTextBlockStyle}" Margin="40,28" />
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SimplexSuite.Controls"
+    xmlns:pages="using:SimplexSuite.Pages"
+    xmlns:audio="using:SimplexSuite.Core.Audio"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    Background="Transparent"
+    AllowDrop="True" DragOver="Page_DragOver" Drop="Page_Drop">
+
+    <Grid Padding="24,16,24,12" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Kopfzeile -->
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <TextBlock Text="Podcast" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock x:Name="FileNameText" VerticalAlignment="Bottom" Margin="0,0,0,4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <!-- Befehlsleiste -->
+        <CommandBar Grid.Row="1" HorizontalAlignment="Left" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True">
+            <AppBarButton Label="Öffnen" Click="Open_Click" ToolTipService.ToolTip="Audio- oder Videodatei öffnen (Strg+O)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8E5;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Aufnehmen" Click="Record_Click" ToolTipService.ToolTip="Vom Mikrofon aufnehmen (an der Cursorposition einfügen)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7C8;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Exportieren" Click="Export_Click" x:Name="ExportButton" ToolTipService.ToolTip="Als MP3, WAV, FLAC, M4A, Opus … speichern (Strg+S)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xEDE1;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton x:Name="UndoButton" Label="Rückgängig" Click="Undo_Click" ToolTipService.ToolTip="Rückgängig (Strg+Z)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7A7;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton x:Name="RedoButton" Label="Wiederholen" Click="Redo_Click" ToolTipService.ToolTip="Wiederholen (Strg+Y)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7A6;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton Label="Ausschneiden" Click="Cut_Click" ToolTipService.ToolTip="Strg+X">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8C6;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Kopieren" Click="Copy_Click" ToolTipService.ToolTip="Strg+C">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8C8;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Einfügen" Click="Paste_Click" ToolTipService.ToolTip="Strg+V">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE77F;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Löschen" Click="Delete_Click" ToolTipService.ToolTip="Auswahl entfernen (Entf)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE74D;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Zuschneiden" Click="Trim_Click" ToolTipService.ToolTip="Nur die Auswahl behalten (Strg+T)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7A8;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="Auswahl stummschalten" Click="Silence_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE74F;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Stille einfügen …" Click="InsertSilence_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE710;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Datei an Cursor einfügen …" Click="InsertFile_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE8B5;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Datei unterlegen (mischen) …" Click="MixFile_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE8D6;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarSeparator />
+                <AppBarButton Label="Alles auswählen" Click="SelectAll_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE8B3;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Auswahl exakt festlegen …" Click="ExactSelection_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE916;" /></AppBarButton.Icon>
+                </AppBarButton>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="400" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Editor -->
+            <Border Style="{StaticResource CardBorderStyle}" Padding="12,8,12,8">
+                <Grid RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <controls:WaveformView x:Name="Wave" />
+
+                    <StackPanel x:Name="EmptyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                        <FontIcon Glyph="&#xE720;" FontSize="48" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Lege eine Audio- oder Videodatei hier ab" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
+                        <TextBlock Text="MP3, WAV, FLAC, M4A, OGG, Opus, MP4, MKV … oder nimm direkt auf." Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Button Content="Datei öffnen" Style="{StaticResource AccentButtonStyle}" Click="Open_Click" />
+                            <Button Content="Aufnahme starten" Click="Record_Click" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Transport -->
+                    <Grid Grid.Row="1" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Button x:Name="PlayButton" Click="Play_Click" Style="{StaticResource AccentButtonStyle}" ToolTipService.ToolTip="Wiedergabe / Pause (Leertaste)" Width="44" Height="36">
+                                <FontIcon x:Name="PlayIcon" Glyph="&#xE768;" FontSize="14" />
+                            </Button>
+                            <Button Click="Stop_Click" ToolTipService.ToolTip="Stopp" Width="40" Height="36">
+                                <FontIcon Glyph="&#xE71A;" FontSize="14" />
+                            </Button>
+                            <Button Click="PlaySelection_Click" ToolTipService.ToolTip="Auswahl abspielen" Height="36">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon Glyph="&#xE8B3;" FontSize="14" />
+                                    <TextBlock Text="Auswahl" />
+                                </StackPanel>
+                            </Button>
+                            <ToggleButton x:Name="FollowToggle" IsChecked="True" ToolTipService.ToolTip="Ansicht folgt der Wiedergabe" Height="36">
+                                <FontIcon Glyph="&#xE7C1;" FontSize="14" />
+                            </ToggleButton>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center" Margin="12,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Position" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="PositionText" Text="00:00.000" FontFamily="Consolas" FontSize="16" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Auswahl" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="SelectionText" Text="–" FontFamily="Consolas" FontSize="16" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Länge" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock x:Name="DurationText" Text="00:00.000" FontFamily="Consolas" FontSize="16" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <FontIcon Glyph="&#xE767;" FontSize="14" Margin="0,0,4,0" />
+                            <Slider x:Name="VolumeSlider" Width="100" Minimum="0" Maximum="150" Value="100" ValueChanged="Volume_ValueChanged" VerticalAlignment="Center" />
+                            <AppBarSeparator />
+                            <Button Click="ZoomOut_Click" ToolTipService.ToolTip="Verkleinern (Strg+Mausrad)" Height="36"><FontIcon Glyph="&#xE71F;" FontSize="14" /></Button>
+                            <Button Click="ZoomIn_Click" ToolTipService.ToolTip="Vergrößern (Strg+Mausrad)" Height="36"><FontIcon Glyph="&#xE8A3;" FontSize="14" /></Button>
+                            <Button Click="ZoomSel_Click" ToolTipService.ToolTip="Auf Auswahl zoomen" Height="36"><FontIcon Glyph="&#xE71E;" FontSize="14" /></Button>
+                            <Button Click="ZoomFit_Click" ToolTipService.ToolTip="Ganze Datei anzeigen" Height="36"><FontIcon Glyph="&#xE9A6;" FontSize="14" /></Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Seitenleiste -->
+            <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <SelectorBar x:Name="SideSelector" SelectionChanged="SideSelector_SelectionChanged" Margin="8,4,8,0">
+                        <SelectorBarItem Text="Effekte" Tag="fx" IsSelected="True" />
+                        <SelectorBarItem Text="Transkript" Tag="tr" />
+                        <SelectorBarItem Text="Marker" Tag="mk" />
+                        <SelectorBarItem Text="Analyse" Tag="an" />
+                    </SelectorBar>
+
+                    <!-- Effekte -->
+                    <ScrollViewer x:Name="FxPanel" Grid.Row="1" Padding="12,8,12,12">
+                        <StackPanel Spacing="4">
+                            <InfoBar x:Name="TargetInfo" IsOpen="True" IsClosable="False" Severity="Informational" Title="Ziel" Message="Gesamte Datei" />
+                            <StackPanel x:Name="EffectsHost" Spacing="4" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Transkript -->
+                    <Grid x:Name="TranscriptPanel" Grid.Row="1" Visibility="Collapsed" Padding="12,8,12,12" RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Spacing="8">
+                            <InfoBar x:Name="NoModelInfo" IsOpen="False" Severity="Warning" Title="Kein Whisper-Modell installiert"
+                                     Message="Lade in den Einstellungen ein Modell herunter (empfohlen: Large v3 Turbo Q5).">
+                                <InfoBar.ActionButton>
+                                    <Button Content="Zu den Einstellungen" Click="GoSettings_Click" />
+                                </InfoBar.ActionButton>
+                            </InfoBar>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="ModelBox" Header="Modell" HorizontalAlignment="Stretch" />
+                                <ComboBox x:Name="LangBox" Grid.Column="1" Header="Sprache" HorizontalAlignment="Stretch" />
+                            </Grid>
+                            <Button x:Name="TranscribeButton" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" Click="Transcribe_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE1D6;" FontSize="14" />
+                                    <TextBlock Text="Transkribieren (lokal)" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                        <CommandBar Grid.Row="1" DefaultLabelPosition="Collapsed" HorizontalAlignment="Left" OverflowButtonVisibility="Auto">
+                            <AppBarButton Label="Füllwörter markieren" ToolTipService.ToolTip="Füllwörter (äh, ähm …) markieren" Click="MarkFillers_Click">
+                                <AppBarButton.Icon><FontIcon Glyph="&#xE7C3;" /></AppBarButton.Icon>
+                            </AppBarButton>
+                            <AppBarButton Label="Markierte Wörter herausschneiden" ToolTipService.ToolTip="Markierte Wörter aus dem Audio schneiden" Click="RemoveWords_Click">
+                                <AppBarButton.Icon><FontIcon Glyph="&#xE8C6;" /></AppBarButton.Icon>
+                            </AppBarButton>
+                            <AppBarButton Label="Markierung aufheben" ToolTipService.ToolTip="Markierung aufheben" Click="ClearWordSel_Click">
+                                <AppBarButton.Icon><FontIcon Glyph="&#xE8E6;" /></AppBarButton.Icon>
+                            </AppBarButton>
+                            <AppBarButton Label="Exportieren" ToolTipService.ToolTip="Transkript exportieren (SRT, VTT, TXT)">
+                                <AppBarButton.Icon><FontIcon Glyph="&#xE792;" /></AppBarButton.Icon>
+                                <AppBarButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Untertitel (SRT)" Tag="srt" Click="ExportTranscript_Click" />
+                                        <MenuFlyoutItem Text="Untertitel (WebVTT)" Tag="vtt" Click="ExportTranscript_Click" />
+                                        <MenuFlyoutItem Text="Text mit Zeitstempeln" Tag="txt" Click="ExportTranscript_Click" />
+                                        <MenuFlyoutItem Text="Reiner Text" Tag="plain" Click="ExportTranscript_Click" />
+                                    </MenuFlyout>
+                                </AppBarButton.Flyout>
+                            </AppBarButton>
+                        </CommandBar>
+                        <AutoSuggestBox x:Name="SearchBox" Grid.Row="2" PlaceholderText="Im Transkript suchen und markieren" QueryIcon="Find" QuerySubmitted="Search_QuerySubmitted" />
+                        <ListView x:Name="TranscriptList" Grid.Row="3" SelectionMode="None" Padding="0,4,0,0">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                                    <Setter Property="Padding" Value="4,6,4,6" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="audio:TranscriptLine">
+                                    <StackPanel Spacing="2">
+                                        <HyperlinkButton Content="{x:Bind TimeText}" Padding="2,0" FontSize="12" Click="LineTime_Click" />
+                                        <ItemsControl ItemsSource="{x:Bind Words}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <toolkit:WrapPanel HorizontalSpacing="2" VerticalSpacing="2" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="audio:TranscriptWord">
+                                                    <ToggleButton Content="{x:Bind Text}" IsChecked="{x:Bind IsSelected, Mode=OneWay}"
+                                                                  Padding="5,1,5,2" MinWidth="0" MinHeight="0" FontSize="14"
+                                                                  BorderThickness="0"
+                                                                  Background="{x:Bind pages:PodcastPage.WordBackground(IsFiller), Mode=OneWay}"
+                                                                  Click="Word_Click" DoubleTapped="Word_DoubleTapped" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Name="TranscriptEmpty" Grid.Row="3" TextWrapping="Wrap" Margin="4,16" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="Noch kein Transkript. Nach dem Transkribieren kannst du Wörter anklicken und herausschneiden – wie in einem Textdokument." />
+                    </Grid>
+
+                    <!-- Marker -->
+                    <Grid x:Name="MarkerPanel" Grid.Row="1" Visibility="Collapsed" Padding="12,8,12,12" RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Click="AddMarker_Click" Style="{StaticResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE710;" FontSize="14" />
+                                    <TextBlock Text="Marker (M)" />
+                                </StackPanel>
+                            </Button>
+                            <Button Content="Kapitel kopieren" Click="CopyChapters_Click" ToolTipService.ToolTip="Kapitelliste für Shownotes in die Zwischenablage" />
+                        </StackPanel>
+                        <ListView x:Name="MarkerList" Grid.Row="1" SelectionMode="Single">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="audio:AudioMarker">
+                                    <Grid ColumnSpacing="8" Padding="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <HyperlinkButton Content="{x:Bind TimeText, Mode=OneWay}" Click="MarkerTime_Click" FontFamily="Consolas" />
+                                        <TextBox Grid.Column="1" Text="{x:Bind Name, Mode=TwoWay}" VerticalAlignment="Center" />
+                                        <Button Grid.Column="2" Click="RemoveMarker_Click" ToolTipService.ToolTip="Entfernen">
+                                            <FontIcon Glyph="&#xE74D;" FontSize="12" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+
+                    <!-- Analyse -->
+                    <ScrollViewer x:Name="AnalysisPanel" Grid.Row="1" Visibility="Collapsed" Padding="12,8,12,12">
+                        <StackPanel Spacing="4">
+                            <Button Content="Lautheit &amp; Pegel messen" Style="{StaticResource AccentButtonStyle}" Click="Analyze_Click" HorizontalAlignment="Stretch" />
+                            <toolkit:SettingsCard Header="Integrierte Lautheit" Description="Ziel für Podcasts: −16 LUFS (Stereo) / −19 LUFS (Mono)">
+                                <TextBlock x:Name="LufsText" Text="–" FontFamily="Consolas" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard Header="Lautheitsumfang (LRA)">
+                                <TextBlock x:Name="LraText" Text="–" FontFamily="Consolas" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard Header="Spitzenpegel">
+                                <TextBlock x:Name="PeakText" Text="–" FontFamily="Consolas" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard Header="RMS">
+                                <TextBlock x:Name="RmsText" Text="–" FontFamily="Consolas" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard Header="Format">
+                                <TextBlock x:Name="FormatText" Text="–" />
+                            </toolkit:SettingsCard>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Statusleiste -->
+        <Grid Grid.Row="3" ColumnSpacing="12" MinHeight="32">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="Tipp: Ziehen = Auswahl · Umschalt+Klick = Auswahl erweitern · Strg+Mausrad = Zoom · Umschalt+Mausrad = Höhe" />
+            <StackPanel x:Name="BusyPanel" Grid.Column="1" Orientation="Horizontal" Spacing="8" Visibility="Collapsed">
+                <TextBlock x:Name="BusyText" VerticalAlignment="Center" />
+                <ProgressBar x:Name="BusyBar" Width="220" VerticalAlignment="Center" Maximum="100" />
+                <Button Content="Abbrechen" Click="CancelBusy_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Page>
