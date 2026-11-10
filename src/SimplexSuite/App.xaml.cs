@@ -20,7 +20,10 @@ public partial class App : Application
         Core.Pdf.PdfFontResolver.Install();
         MainWindow = new MainWindow();
         MainWindow.Activate();
-        var cmd = Environment.GetCommandLineArgs().Skip(1).FirstOrDefault(File.Exists);
+        var args2 = Environment.GetCommandLineArgs().Skip(1).ToList();
+        var page = args2.FirstOrDefault(a => a.StartsWith("--page=", StringComparison.OrdinalIgnoreCase));
+        if (page != null) MainWindow.Navigate(page[7..].ToLowerInvariant());
+        var cmd = args2.FirstOrDefault(File.Exists);
         if (cmd != null) MainWindow.OpenFile(cmd);
     }
 

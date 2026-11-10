@@ -95,7 +95,7 @@ jobs:
           & $ff -v error -y -f lavfi -i "testsrc2=s=1280x720:r=30:d=6" -f lavfi -i "sine=f=440:d=6" -shortest -c:v libx264 -pix_fmt yuv420p "$samples/clip.mp4"
           & $ff -v error -y -f lavfi -i "testsrc=s=800x1100:d=1" -frames:v 1 "$samples/scan.png"
           $failed = $false
-          foreach ($case in @(@{n="start"; a=""}, @{n="podcast"; a="$samples/podcast.wav"}, @{n="video"; a="$samples/clip.mp4"}, @{n="pdf"; a="$samples/scan.png"})) {
+          foreach ($case in @(@{n="start"; a=""}, @{n="podcast"; a="$samples/podcast.wav"}, @{n="video"; a="$samples/clip.mp4"}, @{n="pdf"; a="$samples/scan.png"}, @{n="einstellungen"; a="--page=settings"})) {
             if ($case.a) { $p = Start-Process $exe -ArgumentList "`"$($case.a)`"" -PassThru } else { $p = Start-Process $exe -PassThru }
             Start-Sleep -Seconds 25
             $alive = -not $p.HasExited
