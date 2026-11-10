@@ -15,6 +15,7 @@ public static class PdfRenderService
 
     public static async Task<PdfDocument> GetDocumentAsync(string path, string? password = null)
     {
+        path = Path.GetFullPath(path);
         if (Docs.TryGetValue(path, out var d)) return d;
         var file = await StorageFile.GetFileFromPathAsync(path);
         d = string.IsNullOrEmpty(password) ? await PdfDocument.LoadFromFileAsync(file) : await PdfDocument.LoadFromFileAsync(file, password);
@@ -22,7 +23,7 @@ public static class PdfRenderService
         return d;
     }
 
-    public static void Forget(string path) => Docs.Remove(path);
+    public static void Forget(string path) { try { Docs.Remove(Path.GetFullPath(path)); } catch { } }
 
     /// <summary>Rendert die Grundansicht einer Seite (ohne Zusatzdrehung) als PNG.</summary>
     public static async Task<byte[]?> RenderAsync(PdfPageItem item, double widthPx)
@@ -59,7 +60,7 @@ public static class PdfRenderService
 
     private static async Task<byte[]> ScaleImageAsync(string path, uint width)
     {
-        var file = await StorageFile.GetFileFromPathAsync(path);
+        var file = await StorageFile.GetFileFromPathAsync(Path.GetFullPath(path));
         using var input = await file.OpenReadAsync();
         var decoder = await BitmapDecoder.CreateAsync(input);
         double k = Math.Min(1, (double)width / decoder.OrientedPixelWidth);
@@ -74,7 +75,7 @@ public static class PdfRenderService
 
     public static async Task<(int W, int H)> ImageSizeAsync(string path)
     {
-        var file = await StorageFile.GetFileFromPathAsync(path);
+        var file = await StorageFile.GetFileFromPathAsync(Path.GetFullPath(path));
         using var input = await file.OpenReadAsync();
         var decoder = await BitmapDecoder.CreateAsync(input);
         return ((int)decoder.OrientedPixelWidth, (int)decoder.OrientedPixelHeight);

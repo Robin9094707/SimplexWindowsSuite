@@ -24,9 +24,10 @@
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="True"
-            PaneDisplayMode="Left"
+            PaneDisplayMode="Auto"
+            ExpandedModeThresholdWidth="1360"
+            CompactModeThresholdWidth="0"
             OpenPaneLength="260"
-            IsPaneOpen="True"
             SelectionChanged="NavView_SelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Start" Tag="home">

@@ -40,6 +40,7 @@ public sealed partial class PodcastPage : Page, IClosableEditor, IDisposable
         FillTranscriptCombos();
         UpdateUi();
         Loaded += (_, _) => FillTranscriptCombos();
+        SizeChanged += (_, e) => SideColumn.Width = new GridLength(e.NewSize.Width < 1100 ? 330 : 400);
     }
 
     public bool HasUnsavedChanges => _doc?.IsDirty == true;

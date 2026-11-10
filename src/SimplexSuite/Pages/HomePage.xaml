@@ -19,7 +19,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left"
+                <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" VerticalContentAlignment="Top"
                         Padding="20" Click="OpenPodcast_Click">
                     <StackPanel Spacing="10">
                         <Border Width="48" Height="48" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left">
@@ -31,7 +31,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left"
+                <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" VerticalContentAlignment="Top"
                         Padding="20" Click="OpenVideo_Click">
                     <StackPanel Spacing="10">
                         <Border Width="48" Height="48" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left">
@@ -43,7 +43,7 @@
                     </StackPanel>
                 </Button>
 
-                <Button Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left"
+                <Button Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left" VerticalContentAlignment="Top"
                         Padding="20" Click="OpenPdf_Click">
                     <StackPanel Spacing="10">
                         <Border Width="48" Height="48" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left">

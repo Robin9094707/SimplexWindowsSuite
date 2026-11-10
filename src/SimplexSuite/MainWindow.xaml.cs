@@ -31,6 +31,10 @@ public sealed partial class MainWindow : Window
         ApplyTheme(AppSettings.Current.Theme);
         ApplyBackdrop(AppSettings.Current.Backdrop);
         NavView.SelectedItem = NavView.MenuItems[0];
+        NavView.Loaded += (_, _) =>
+        {
+            if (NavView.SettingsItem is NavigationViewItem s) { s.Content = "Einstellungen"; ToolTipService.SetToolTip(s, "Einstellungen"); }
+        };
         Closed += OnClosed;
     }
 
@@ -125,6 +129,7 @@ public sealed partial class MainWindow : Window
 
     public void OpenFile(string path)
     {
+        try { path = Path.GetFullPath(path); } catch { }
         var ext = Path.GetExtension(path).ToLowerInvariant();
         if (ext == ".pdf") ShowPage<PdfPage>("pdf").OpenFiles(new[] { path });
         else if (ext == ".ssvproj") ShowPage<VideoPage>("video").OpenProject(path);

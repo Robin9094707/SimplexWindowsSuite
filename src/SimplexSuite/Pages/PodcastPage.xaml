@@ -84,7 +84,7 @@
         <Grid Grid.Row="2" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="400" />
+                <ColumnDefinition x:Name="SideColumn" Width="400" />
             </Grid.ColumnDefinitions>
 
             <!-- Editor -->

@@ -54,6 +54,12 @@ public sealed partial class PdfPage : Page, IClosableEditor
         }
         catch { }
         KeyDown += Page_KeyDown;
+        SizeChanged += (_, e) =>
+        {
+            bool narrow = e.NewSize.Width < 1150;
+            ThumbColumn.Width = new GridLength(narrow ? 190 : 210);
+            PropsColumn.Width = new GridLength(narrow ? 260 : 320);
+        };
         UpdateUi();
     }
 
@@ -70,7 +76,7 @@ public sealed partial class PdfPage : Page, IClosableEditor
 
     public async void OpenFiles(IEnumerable<string> paths)
     {
-        var list = paths.ToList();
+        var list = paths.Select(p => { try { return Path.GetFullPath(p); } catch { return p; } }).ToList();
         if (_pages.Count > 0)
         {
             var add = await Ui.ConfirmAsync("Dokument geöffnet", "Sollen die Dateien an das aktuelle Dokument angehängt werden? (Nein = neues Dokument)", "Anhängen", "Neues Dokument");
@@ -339,8 +345,8 @@ public sealed partial class PdfPage : Page, IClosableEditor
         if (item.Kind == PdfPageKind.Blank)
         {
             image.Source = null;
-            image.Width = 150; image.Height = 150 * item.HeightPt / item.WidthPt;
-            if (image.Height > 185) { image.Height = 185; image.Width = 185 * item.WidthPt / item.HeightPt; }
+            image.Width = 140; image.Height = 140 * item.HeightPt / item.WidthPt;
+            if (image.Height > 175) { image.Height = 175; image.Width = 175 * item.WidthPt / item.HeightPt; }
             return;
         }
         image.Width = double.NaN; image.Height = double.NaN;
@@ -371,8 +377,8 @@ public sealed partial class PdfPage : Page, IClosableEditor
     private static void ApplyThumbTransform(Border frame, PdfPageItem item)
     {
         bool sideways = item.ExtraRotation is 90 or 270;
-        frame.MaxWidth = sideways ? 190 : 168;
-        frame.MaxHeight = sideways ? 166 : 198;
+        frame.MaxWidth = sideways ? 180 : 158;
+        frame.MaxHeight = sideways ? 156 : 188;
         frame.RenderTransform = new RotateTransform { Angle = item.ExtraRotation };
     }
 

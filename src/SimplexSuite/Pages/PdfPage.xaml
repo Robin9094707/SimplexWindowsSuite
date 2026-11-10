@@ -87,9 +87,9 @@
 
         <Grid Grid.Row="2" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="320" />
+                <ColumnDefinition x:Name="ThumbColumn" Width="210" />
+                <ColumnDefinition Width="*" MinWidth="260" />
+                <ColumnDefinition x:Name="PropsColumn" Width="320" />
             </Grid.ColumnDefinitions>
 
             <!-- Seitenübersicht -->
@@ -105,8 +105,8 @@
                               ContainerContentChanging="PageGrid_ContainerContentChanging">
                         <GridView.ItemTemplate>
                             <DataTemplate x:DataType="pdf:PdfPageItem">
-                                <StackPanel Width="170" Spacing="4" Padding="0,4,0,4">
-                                    <Grid Height="200" Width="170">
+                                <StackPanel Width="160" Spacing="4" Padding="0,4,0,4">
+                                    <Grid Height="190" Width="160">
                                         <Border x:Name="ThumbFrame" Background="White" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
                                                 HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                                             <Image x:Name="ThumbImage" Stretch="Uniform" />
@@ -128,6 +128,11 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid Padding="8,6,8,6" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Hidden" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
                         <StackPanel x:Name="ToolBar" Orientation="Horizontal" Spacing="2">
                             <ToggleButton Tag="Select" Style="{StaticResource ToolButtonStyle}" IsChecked="True" Click="Tool_Click" ToolTipService.ToolTip="Auswählen und verschieben (V)"><FontIcon Glyph="&#xE8B0;" FontSize="16" /></ToggleButton>
                             <ToggleButton Tag="Text" Style="{StaticResource ToolButtonStyle}" Click="Tool_Click" ToolTipService.ToolTip="Text hinzufügen"><FontIcon Glyph="&#xE8D2;" FontSize="16" /></ToggleButton>
@@ -142,7 +147,8 @@
                             <ToggleButton Tag="Image" Style="{StaticResource ToolButtonStyle}" Click="Tool_Click" ToolTipService.ToolTip="Bild / Stempel einfügen"><FontIcon Glyph="&#xEB9F;" FontSize="16" /></ToggleButton>
                             <ToggleButton Tag="Signature" Style="{StaticResource ToolButtonStyle}" Click="Tool_Click" ToolTipService.ToolTip="Unterschreiben"><FontIcon Glyph="&#xEE56;" FontSize="16" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" /></ToggleButton>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                        </ScrollViewer>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
                             <Button Click="ZoomOut_Click" ToolTipService.ToolTip="Verkleinern"><FontIcon Glyph="&#xE71F;" FontSize="12" /></Button>
                             <TextBlock x:Name="ZoomText" VerticalAlignment="Center" MinWidth="44" TextAlignment="Center" Text="100 %" />
                             <Button Click="ZoomIn_Click" ToolTipService.ToolTip="Vergrößern"><FontIcon Glyph="&#xE8A3;" FontSize="12" /></Button>
@@ -166,8 +172,8 @@
                     </ScrollViewer>
                     <StackPanel x:Name="EmptyPanel" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                         <FontIcon Glyph="&#xE8A5;" FontSize="48" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock Text="PDFs oder Bilder hier ablegen" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
-                        <TextBlock Text="Mehrere Dateien werden automatisch zusammengeführt." Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="PDFs oder Bilder hier ablegen" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                        <TextBlock Text="Mehrere Dateien werden automatisch zusammengeführt." Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <Button Content="Dateien öffnen" Style="{StaticResource AccentButtonStyle}" Click="Open_Click" />
                             <Button Content="Leeres Dokument" Click="NewBlank_Click" />

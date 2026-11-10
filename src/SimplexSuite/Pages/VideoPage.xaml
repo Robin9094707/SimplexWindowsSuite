@@ -11,9 +11,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="3*" MinHeight="220" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="300" />
+            <RowDefinition Height="2*" MinHeight="180" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
@@ -91,9 +91,9 @@
         <!-- Oberer Bereich -->
         <Grid Grid.Row="2" ColumnSpacing="12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="260" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="360" />
+                <ColumnDefinition x:Name="MediaColumn" Width="260" />
+                <ColumnDefinition Width="*" MinWidth="240" />
+                <ColumnDefinition x:Name="InspectorColumn" Width="360" />
             </Grid.ColumnDefinitions>
 
             <!-- Medien -->

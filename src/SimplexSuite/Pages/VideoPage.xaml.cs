@@ -50,6 +50,12 @@ public sealed partial class VideoPage : Page, IClosableEditor, IDisposable
         _playTimer.Tick += PlayTimer_Tick;
         KeyDown += Page_KeyDown;
         Loaded += (_, _) => { BuildInspector(); UpdateTime(); };
+        SizeChanged += (_, e) =>
+        {
+            bool narrow = e.NewSize.Width < 1150;
+            MediaColumn.Width = new GridLength(narrow ? 190 : 260);
+            InspectorColumn.Width = new GridLength(narrow ? 290 : 360);
+        };
         UpdateUndoUi();
     }
 
@@ -468,12 +474,19 @@ public sealed partial class VideoPage : Page, IClosableEditor, IDisposable
         catch (Exception ex)
         {
             PreviewHint.Visibility = Visibility.Visible;
-            PreviewHint.Text = "Vorschau nicht möglich: " + ex.Message.Split('\n').Last(l => l.Trim().Length > 0);
+            var line = ex.Message.Split('\n').LastOrDefault(l => l.Trim().Length > 0) ?? ex.GetType().Name;
+            PreviewHint.Text = "Vorschau nicht möglich: " + line;
+            Log(ex);
         }
         finally
         {
             if (ReferenceEquals(cts, _frameCts)) PreviewRing.IsActive = false;
         }
+    }
+
+    private static void Log(Exception ex)
+    {
+        try { File.AppendAllText(Path.Combine(AppPaths.DataRoot, "error.log"), $"[{DateTime.Now:u}] {ex}\n\n"); } catch { }
     }
 
     private void PrevFrame_Click(object sender, RoutedEventArgs e) => StepFrame(-1);

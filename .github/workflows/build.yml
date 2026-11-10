@@ -73,6 +73,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Continue'
           Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          try { Set-DisplayResolution -Width 1600 -Height 900 -Force -ErrorAction Stop } catch { Write-Host "Auflösung bleibt: $_" }
           $exe = (Resolve-Path "publish/SimplexSuite/SimplexSuite.exe").Path
           $ff = (Resolve-Path "publish/SimplexSuite/ffmpeg/ffmpeg.exe").Path
           $shots = "$env:RUNNER_TEMP/shots"; New-Item -ItemType Directory -Force -Path $shots | Out-Null
