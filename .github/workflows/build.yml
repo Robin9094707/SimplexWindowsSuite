@@ -68,6 +68,48 @@ jobs:
           & "$dest/ffmpeg.exe" -hide_banner -version | Select-Object -First 1
           Get-ChildItem $dest
 
+      - name: Rauchtest (App starten + Screenshots)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $exe = (Resolve-Path "publish/SimplexSuite/SimplexSuite.exe").Path
+          $ff = (Resolve-Path "publish/SimplexSuite/ffmpeg/ffmpeg.exe").Path
+          $shots = "$env:RUNNER_TEMP/shots"; New-Item -ItemType Directory -Force -Path $shots | Out-Null
+          $samples = "$env:RUNNER_TEMP/samples"; New-Item -ItemType Directory -Force -Path $samples | Out-Null
+          & $ff -v error -y -f lavfi -i "sine=f=220:d=8" -f lavfi -i "anoisesrc=a=0.02:d=8" -filter_complex "[0][1]amix=inputs=2" "$samples/podcast.wav"
+          & $ff -v error -y -f lavfi -i "testsrc2=s=1280x720:r=30:d=6" -f lavfi -i "sine=f=440:d=6" -shortest -c:v libx264 -pix_fmt yuv420p "$samples/clip.mp4"
+          & $ff -v error -y -f lavfi -i "testsrc=s=800x1100:d=1" -frames:v 1 "$samples/scan.png"
+          $failed = $false
+          foreach ($case in @(@{n="start"; a=""}, @{n="podcast"; a="$samples/podcast.wav"}, @{n="video"; a="$samples/clip.mp4"}, @{n="pdf"; a="$samples/scan.png"})) {
+            if ($case.a) { $p = Start-Process $exe -ArgumentList "`"$($case.a)`"" -PassThru } else { $p = Start-Process $exe -PassThru }
+            Start-Sleep -Seconds 25
+            $alive = -not $p.HasExited
+            Write-Host "$($case.n): läuft = $alive"
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("$shots/$($case.n).png", [System.Drawing.Imaging.ImageFormat]::Png)
+            $g.Dispose(); $bmp.Dispose()
+            if (-not $alive) { $failed = $true; Write-Warning "App beendet (Exit $($p.ExitCode))" }
+            else { Stop-Process -Id $p.Id -Force }
+            Start-Sleep -Seconds 2
+          }
+          $log = "$env:LOCALAPPDATA/SimplexSuite/error.log"
+          if (Test-Path $log) { Copy-Item $log $shots; Get-Content $log | Select-Object -First 60 }
+          Get-WinEvent -FilterHashtable @{LogName='Application'; Level=2; StartTime=(Get-Date).AddMinutes(-5)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.Message -match 'SimplexSuite' } | Select-Object -First 5 | ForEach-Object { $_.Message } | Out-File "$shots/events.txt"
+          if (Test-Path "$shots/events.txt") { Get-Content "$shots/events.txt" }
+          if ($failed) { exit 1 }
+
+      - name: Screenshots hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: ${{ runner.temp }}/shots/*
+
       - name: Installer bauen (Inno Setup)
         shell: pwsh
         run: |
