@@ -34,6 +34,12 @@ public sealed partial class MainWindow : Window
         NavView.Loaded += (_, _) =>
         {
             if (NavView.SettingsItem is NavigationViewItem s) { s.Content = "Einstellungen"; ToolTipService.SetToolTip(s, "Einstellungen"); }
+            if (_pendingPage != null)
+            {
+                var p = _pendingPage;
+                _pendingPage = null;
+                DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => ShowPage(p));
+            }
         };
         Closed += OnClosed;
     }
@@ -125,7 +131,13 @@ public sealed partial class MainWindow : Window
         return page;
     }
 
-    public void Navigate(string tag) => ShowPage(tag);
+    private string? _pendingPage;
+
+    public void Navigate(string tag)
+    {
+        if (!NavView.IsLoaded) { _pendingPage = tag; return; }
+        ShowPage(tag);
+    }
 
     public void OpenFile(string path)
     {
