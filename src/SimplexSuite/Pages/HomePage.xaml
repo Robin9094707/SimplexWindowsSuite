@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="SimplexSuite.Pages.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    Background="Transparent">
+
+    <ScrollViewer>
+        <StackPanel MaxWidth="1100" Padding="40,28,40,40" HorizontalAlignment="Stretch">
+            <TextBlock Text="Start" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock Margin="0,8,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"
+                       Text="Podcasts schneiden, Videos bearbeiten und PDFs gestalten – alles lokal auf deinem PC, ohne Abo und ohne Cloud." />
+
+            <Grid Margin="0,24,0,0" ColumnSpacing="12" RowSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        Padding="20" Click="OpenPodcast_Click">
+                    <StackPanel Spacing="10">
+                        <Border Width="48" Height="48" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left">
+                            <FontIcon Glyph="&#xE720;" FontSize="22" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                        </Border>
+                        <TextBlock Text="Podcast-Studio" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="Aufnehmen, schneiden, entrauschen, Effekte, Lautheit, KI-Transkript mit textbasiertem Schnitt." />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        Padding="20" Click="OpenVideo_Click">
+                    <StackPanel Spacing="10">
+                        <Border Width="48" Height="48" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left">
+                            <FontIcon Glyph="&#xE714;" FontSize="22" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                        </Border>
+                        <TextBlock Text="Video-Editor" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="Mehrspur-Timeline, Farbkorrektur, Chroma Key, Texte, Blenden, automatische Untertitel, GPU-Export." />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        Padding="20" Click="OpenPdf_Click">
+                    <StackPanel Spacing="10">
+                        <Border Width="48" Height="48" CornerRadius="10" Background="{ThemeResource AccentFillColorDefaultBrush}" HorizontalAlignment="Left">
+                            <FontIcon Glyph="&#xE8A5;" FontSize="22" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                        </Border>
+                        <TextBlock Text="PDF-Werkstatt" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="Seiten ordnen, zusammenführen, kommentieren, unterschreiben, sicher schwärzen, Texterkennung (OCR)." />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <TextBlock Text="Zuletzt verwendet" Style="{StaticResource SectionHeaderStyle}" />
+            <StackPanel x:Name="RecentPanel" Spacing="4" />
+            <TextBlock x:Name="NoRecentText" Text="Noch keine Dateien geöffnet." Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="1,0,0,0" />
+
+            <TextBlock Text="System" Style="{StaticResource SectionHeaderStyle}" />
+            <StackPanel Spacing="4">
+                <toolkit:SettingsCard x:Name="FfmpegCard" Header="Medien-Engine (FFmpeg)">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE90B;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <TextBlock x:Name="FfmpegStatus" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard x:Name="WhisperCard" Header="Lokale Spracherkennung (Whisper)" IsClickEnabled="True" Click="WhisperCard_Click">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE1D6;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <TextBlock x:Name="WhisperStatus" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </toolkit:SettingsCard>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
