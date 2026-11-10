@@ -166,7 +166,7 @@ public sealed partial class SettingsPage : Page
     private void RateBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loading) return;
-        AppSettings.Current.WorkingSampleRate = int.Parse(Tag(RateBox) ?? "48000");
+        AppSettings.Current.WorkingSampleRate = int.Parse(TagOf(RateBox) ?? "48000");
         AppSettings.Current.Save();
     }
 
