@@ -183,6 +183,7 @@ public sealed partial class VideoPage : Page, IClosableEditor, IDisposable
                     _mediaCache[item.Id] = (item.ThumbnailPath, null);
                     _project.Media.Add(item);
                     added.Add(item);
+                    AppSettings.Current.AddRecent(path);
                     RebuildMediaList();
                     if (item.HasAudio) _ = LoadPeaksAsync(item);
                 }

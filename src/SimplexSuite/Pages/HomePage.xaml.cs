@@ -27,7 +27,8 @@ public sealed partial class HomePage : Page
                 HeaderIcon = Ui.Icon(Path.GetExtension(path).ToLowerInvariant() switch
                 {
                     ".pdf" => "",
-                    ".ssvproj" or ".mp4" or ".mov" or ".mkv" => "",
+                    ".ssvproj" or ".mp4" or ".mov" or ".mkv" or ".webm" or ".avi" or ".m4v" or ".gif" => "\uE714",
+                    ".png" or ".jpg" or ".jpeg" or ".bmp" or ".tif" or ".tiff" or ".webp" => "\uEB9F",
                     _ => "",
                 }),
             };
