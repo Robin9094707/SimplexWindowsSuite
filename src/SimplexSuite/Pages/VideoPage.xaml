@@ -1,6 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Page x:Class="SimplexSuite.Pages.VideoPage"
+<Page
+    x:Class="SimplexSuite.Pages.VideoPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="Transparent">
-    <TextBlock Text="Video" Style="{StaticResource TitleTextBlockStyle}" Margin="40,28" />
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SimplexSuite.Controls"
+    Background="Transparent"
+    AllowDrop="True" DragOver="Page_DragOver" Drop="Page_Drop">
+
+    <Grid Padding="24,16,24,12" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="300" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <TextBlock Text="Video" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock x:Name="ProjectNameText" VerticalAlignment="Bottom" Margin="0,0,0,4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Neues Projekt" />
+        </StackPanel>
+
+        <CommandBar Grid.Row="1" HorizontalAlignment="Left" DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True">
+            <AppBarButton Label="Importieren" Click="Import_Click" ToolTipService.ToolTip="Videos, Audio und Bilder importieren (Strg+I)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8B5;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Text" Click="AddText_Click" ToolTipService.ToolTip="Titel / Text am Abspielkopf einfügen">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8D2;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Untertitel (KI)" Click="Subtitles_Click" ToolTipService.ToolTip="Untertitel lokal mit Whisper erzeugen">
+                <AppBarButton.Icon><FontIcon Glyph="&#xED1E;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Exportieren" Click="Export_Click" ToolTipService.ToolTip="Video rendern (Strg+E)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xEDE1;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton x:Name="UndoButton" Label="Rückgängig" Click="Undo_Click" ToolTipService.ToolTip="Strg+Z">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7A7;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton x:Name="RedoButton" Label="Wiederholen" Click="Redo_Click" ToolTipService.ToolTip="Strg+Y">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE7A6;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarButton Label="Teilen" Click="Split_Click" ToolTipService.ToolTip="Clip am Abspielkopf teilen (S)">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8C6;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Löschen" Click="DeleteClip_Click" ToolTipService.ToolTip="Clip löschen (Entf) · Lücke schließen: Umschalt+Entf">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE74D;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Duplizieren" Click="Duplicate_Click" ToolTipService.ToolTip="Strg+D">
+                <AppBarButton.Icon><FontIcon Glyph="&#xE8C8;" /></AppBarButton.Icon>
+            </AppBarButton>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="Neues Projekt" Click="New_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE710;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Projekt öffnen …" Click="OpenProject_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE8E5;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Projekt speichern" Click="SaveProject_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE74E;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarSeparator />
+                <AppBarButton Label="Projekteinstellungen …" Click="ProjectSettings_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE713;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Spur hinzufügen: Video" Tag="Video" Click="AddTrack_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE714;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Spur hinzufügen: Audio" Tag="Audio" Click="AddTrack_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE8D6;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Spur hinzufügen: Text" Tag="Text" Click="AddTrack_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE8D2;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Leere Spuren entfernen" Click="RemoveEmptyTracks_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE738;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarSeparator />
+                <AppBarButton Label="Untertitel als SRT speichern …" Click="ExportSrt_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE792;" /></AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Aktuelles Bild speichern …" Click="SaveFrame_Click">
+                    <AppBarButton.Icon><FontIcon Glyph="&#xE722;" /></AppBarButton.Icon>
+                </AppBarButton>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+
+        <!-- Oberer Bereich -->
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="360" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Medien -->
+            <Border Style="{StaticResource CardBorderStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Padding="14,10,8,6">
+                        <TextBlock Text="Medien" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                        <Button HorizontalAlignment="Right" Click="Import_Click" ToolTipService.ToolTip="Importieren" Padding="8,4">
+                            <FontIcon Glyph="&#xE710;" FontSize="12" />
+                        </Button>
+                    </Grid>
+                    <ListView x:Name="MediaList" Grid.Row="1" SelectionMode="Single" CanDragItems="True"
+                              DragItemsStarting="MediaList_DragItemsStarting" DoubleTapped="MediaList_DoubleTapped" />
+                    <TextBlock x:Name="MediaEmpty" Grid.Row="1" Margin="16" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="Ziehe Videos, Musik oder Bilder hierher. Doppelklick oder Ziehen fügt sie in die Timeline ein." />
+                </Grid>
+            </Border>
+
+            <!-- Vorschau -->
+            <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="8">
+                <Grid RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border x:Name="PreviewFrame" Background="Black" CornerRadius="4">
+                        <Grid>
+                            <Image x:Name="PreviewImage" Stretch="Uniform" />
+                            <MediaPlayerElement x:Name="PreviewPlayer" Stretch="Uniform" AreTransportControlsEnabled="False" Visibility="Collapsed" />
+                            <ProgressRing x:Name="PreviewRing" IsActive="False" Width="36" Height="36" />
+                            <TextBlock x:Name="PreviewHint" Foreground="#99FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
+                                       Text="Vorschau" />
+                        </Grid>
+                    </Border>
+                    <Grid Grid.Row="1" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Button Click="PrevFrame_Click" ToolTipService.ToolTip="Ein Bild zurück (←)" Height="36"><FontIcon Glyph="&#xE892;" FontSize="14" /></Button>
+                            <Button x:Name="PlayButton" Click="Play_Click" Style="{StaticResource AccentButtonStyle}" Width="44" Height="36" ToolTipService.ToolTip="Wiedergabe (Leertaste)">
+                                <FontIcon x:Name="PlayIcon" Glyph="&#xE768;" FontSize="14" />
+                            </Button>
+                            <Button Click="NextFrame_Click" ToolTipService.ToolTip="Ein Bild vor (→)" Height="36"><FontIcon Glyph="&#xE893;" FontSize="14" /></Button>
+                        </StackPanel>
+                        <TextBlock x:Name="TimeText" Grid.Column="1" VerticalAlignment="Center" FontFamily="Consolas" FontSize="16" Margin="8,0" Text="00:00.000 / 00:00.000" />
+                        <ComboBox x:Name="PreviewQualityBox" Grid.Column="2" SelectedIndex="1" MinWidth="130" ToolTipService.ToolTip="Vorschauqualität">
+                            <ComboBoxItem Content="Vorschau 360p" Tag="360" />
+                            <ComboBoxItem Content="Vorschau 540p" Tag="540" />
+                            <ComboBoxItem Content="Vorschau 720p" Tag="720" />
+                            <ComboBoxItem Content="Vorschau 1080p" Tag="1080" />
+                        </ComboBox>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Inspektor -->
+            <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="InspectorTitle" Text="Eigenschaften" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="14,12,8,6" />
+                    <ScrollViewer Grid.Row="1" Padding="10,0,10,10">
+                        <StackPanel x:Name="InspectorHost" Spacing="4" />
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Werkzeugleiste Timeline -->
+        <Grid Grid.Row="3">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Timeline" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                <TextBlock Text="Ziehen = verschieben · Ränder = trimmen · Strg+Mausrad = Zoom · S = teilen" VerticalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                <Button Click="TlZoomOut_Click" ToolTipService.ToolTip="Verkleinern"><FontIcon Glyph="&#xE71F;" FontSize="12" /></Button>
+                <Button Click="TlZoomIn_Click" ToolTipService.ToolTip="Vergrößern"><FontIcon Glyph="&#xE8A3;" FontSize="12" /></Button>
+                <Button Click="TlFit_Click" ToolTipService.ToolTip="Alles anzeigen"><FontIcon Glyph="&#xE9A6;" FontSize="12" /></Button>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="4" Style="{StaticResource CardBorderStyle}" Padding="0">
+            <controls:TimelineView x:Name="Timeline" />
+        </Border>
+
+        <Grid Grid.Row="5" MinHeight="32">
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <StackPanel x:Name="BusyPanel" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8" Visibility="Collapsed">
+                <TextBlock x:Name="BusyText" VerticalAlignment="Center" />
+                <ProgressBar x:Name="BusyBar" Width="240" Maximum="100" VerticalAlignment="Center" />
+                <Button Content="Abbrechen" Click="CancelBusy_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Page>
